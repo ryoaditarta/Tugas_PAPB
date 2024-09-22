@@ -2,6 +2,7 @@ package com.tifd.projectcomposed
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -47,12 +48,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.ModifierLocalReadScope
 import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -82,7 +87,7 @@ class MainActivity : ComponentActivity() {
             ProjectComposeDTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.contentColorFor(Color.White)
+                    color = Color.White
                 ) {
                     MyScreen()
                 }
@@ -104,7 +109,6 @@ fun MyScreen() {
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val DodgeBlue = Color(0xFF1E90FF)
     var submittedList by remember { mutableStateOf("")}
-
 
 //    fitur baru
     var sortMenuExpanded by remember { mutableStateOf(false) }
@@ -199,7 +203,7 @@ fun MyScreen() {
                 try {
                     val temp = submittedList.split(",")
                     for (i in temp.indices step 2) {
-                        if (i + 1 < temp.size) { // Ensure there is a next element for the pair
+                        if (i + 1 < temp.size) {
                             listStudent = listStudent + Student(temp[i], temp[i + 1])
                         }
                     }
@@ -208,7 +212,7 @@ fun MyScreen() {
                     // Handle exception
                     errorMessage = "Format salah"
                 }
-            }) {
+            }, enabled = Nama.isNotEmpty() && NIM.isNotEmpty()) {
                 Text("Add")
             }
         }
@@ -236,7 +240,7 @@ fun MyScreen() {
                 text = "Mahasiswa Manager",
                 fontSize = 24.sp,
                 modifier = Modifier.padding(8.dp),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
         }
 
@@ -320,7 +324,7 @@ fun MyScreen() {
                         NIM = ""
                         errorMessage = null
                     }
-                }) {
+                }, enabled = Nama.isNotEmpty() && NIM.isNotEmpty()) {
                     Text("Add")
                 }
             }
