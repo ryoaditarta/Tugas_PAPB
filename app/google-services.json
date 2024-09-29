@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "821896719843",
+    "project_id": "mahasiswamanager",
+    "storage_bucket": "mahasiswamanager.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:821896719843:android:2e5277a2eef168066cc4d6",
+        "android_client_info": {
+          "package_name": "com.tifd.projectcomposed"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbGm5dzNCUSikvGr_pgS-OwYEVF2W06KA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

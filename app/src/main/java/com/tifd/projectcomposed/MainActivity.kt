@@ -59,11 +59,14 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat.startActivityForResult
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.tifd.projectcomposed.ui.theme.ProjectComposeDTheme
 
 //private val LightColorScheme = lightColorScheme(
@@ -81,18 +84,25 @@ import com.tifd.projectcomposed.ui.theme.ProjectComposeDTheme
 //}
 
 class MainActivity : ComponentActivity() {
+    lateinit var auth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        auth = FirebaseAuth.getInstance()
         setContent {
             ProjectComposeDTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = Color.White
                 ) {
-                    MyScreen()
+                    MyScreen(auth, ::navigateToListActivity)
                 }
             }
         }
+    }
+    private fun navigateToListActivity() {
+        val intent = Intent(this, ListActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }
 
@@ -102,7 +112,7 @@ class Student(var Nama: String, var NIM: String)
 
 
 @Composable
-fun MyScreen() {
+fun MyScreen(auth: FirebaseAuth, onLoginSuccess: () -> Unit) {
     var listStudent by remember { mutableStateOf(listOf<Student>()) }
     var Nama by remember { mutableStateOf("") }
     var NIM by remember { mutableStateOf("") }
@@ -123,6 +133,12 @@ fun MyScreen() {
     // Upload
     var showTextField by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+
+    //autentikasi admin
+    var errorMessage2 by remember { mutableStateOf("") }
+    var showLoginFields by remember { mutableStateOf(false) }
+    var email by remember {mutableStateOf("")}
+    var password by remember {mutableStateOf("")}
 
     @Composable
     fun StudentCard(student: Student, onRemove: (Student) -> Unit) {
@@ -183,6 +199,29 @@ fun MyScreen() {
         return sttemp
     }
 
+    fun performLogin(
+        auth: FirebaseAuth,
+        email: String,
+        password: String,
+        onLoginSuccess: () -> Unit,
+        onLoginError: (String) -> Unit
+    ) {
+        if (email.isNotEmpty() && password.isNotEmpty()) {
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        // If login is successful, navigate to ListActivity
+                        onLoginSuccess()
+                    } else {
+                        // Handle login failure
+                        onLoginError(task.exception?.localizedMessage ?: "Login failed")
+                    }
+                }
+        } else {
+            onLoginError("Please fill in both fields.")
+        }
+    }
+
     @Composable
     fun renderTextField(){
         OutlinedTextField(
@@ -219,6 +258,7 @@ fun MyScreen() {
     }
 
 
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -252,6 +292,54 @@ fun MyScreen() {
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 5.dp),
         ){
+            if(!showLoginFields){
+                Button(
+                    onClick = { showLoginFields = !showLoginFields }, // Toggle the visibility
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Admin Login")
+                }
+            }
+
+            // If the button is pressed, show the email and password TextFields
+            if (showLoginFields) {
+                Spacer(modifier = Modifier.height(16.dp))
+                TextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+                TextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (errorMessage2.isNotEmpty()) {
+                    Text(
+                        text = errorMessage2,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        performLogin(auth, email, password, onLoginSuccess, onLoginError = {
+                            errorMessage = it
+                        })
+                        showLoginFields = !showLoginFields
+                              },
+                    modifier = Modifier.fillMaxWidth()
+                ){
+                    Text("Login")
+                }
+
+            }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
